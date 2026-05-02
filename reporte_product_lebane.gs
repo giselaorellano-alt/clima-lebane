@@ -1,0 +1,187 @@
+function doGet() {
+  return HtmlService.createHtmlOutput(getHtml())
+    .setTitle('Encuesta de clima — Product | Lebane');
+}
+
+function getHtml() {
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --text-default: #303036;
+    --text-lighter: #636271;
+    --blue-bg: #eff2ff;
+    --blue-dark: #213478;
+    --bg-layout: #f5f6f8;
+    --white: #ffffff;
+    --green: #27ae60;
+    --yellow: #f39c12;
+    --red: #e74c3c;
+    --shadow-4dp: -1px 4px 8px 0px rgba(233,233,244,1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Roboto', sans-serif; font-size: 14px; line-height: 1.4; color: var(--text-default); background: var(--bg-layout); }
+  .topbar { background: var(--white); border-bottom: 1px solid #e8e8f0; padding: 0 32px; height: 56px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-4dp); }
+  .topbar-title { font-size: 18px; font-weight: 600; flex: 1; }
+  .badge { background: #eafaf1; color: #1e8449; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+  .page { max-width: 1200px; margin: 0 auto; padding: 32px 24px 64px; }
+  .area-card { background: var(--white); border-radius: 8px; box-shadow: var(--shadow-4dp); overflow: hidden; }
+  .card-header { background: var(--blue-bg); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #dde3f7; flex-wrap: wrap; gap: 12px; }
+  .card-header .area-name { font-size: 22px; font-weight: 600; color: var(--blue-dark); }
+  .metrics-row { display: flex; flex-wrap: wrap; }
+  .metric-pill { display: flex; flex-direction: column; align-items: center; padding: 8px 20px; border-right: 1px solid #dde3f7; }
+  .metric-pill:last-child { border-right: none; }
+  .metric-pill .m-label { font-size: 11px; font-weight: 600; color: var(--text-lighter); text-transform: uppercase; letter-spacing: 0.6px; }
+  .metric-pill .m-value { font-size: 24px; font-weight: 600; line-height: 1.2; }
+  .metric-pill .m-sub { font-size: 11px; color: var(--text-lighter); }
+  .card-body { padding: 24px; }
+  .enps-section { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #f0f0f5; }
+  .no-data { font-size: 13px; color: var(--text-lighter); font-style: italic; padding: 8px 0; }
+  .q-section-label { font-size: 13px; font-weight: 600; margin-bottom: 8px; margin-top: 20px; color: var(--blue-dark); }
+  .q-table { width: 100%; border-collapse: collapse; }
+  .q-table tr { border-bottom: 1px solid #f0f0f5; }
+  .q-table tr:last-child { border-bottom: none; }
+  .q-table td { padding: 8px 4px; vertical-align: middle; }
+  .q-label { font-size: 13px; width: 55%; padding-right: 16px; }
+  .q-bar-cell { width: 35%; }
+  .q-bar-bg { height: 8px; background: #eee; border-radius: 999px; overflow: hidden; }
+  .q-bar-fill { height: 100%; border-radius: 999px; }
+  .q-bar-fill.high { background: var(--green); }
+  .q-bar-fill.mid { background: var(--yellow); }
+  .q-bar-fill.low { background: var(--red); }
+  .q-pct-cell { font-size: 13px; font-weight: 600; width: 10%; text-align: right; padding-left: 8px; }
+  .q-pct-cell.high { color: var(--green); }
+  .q-pct-cell.mid { color: var(--yellow); }
+  .q-pct-cell.low { color: var(--red); }
+  .ret-note { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #92400e; margin-bottom: 8px; }
+  .comment-bubble { background: #f8f9ff; border-left: 3px solid #6f93eb; border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
+  .dist-bar { display: flex; height: 12px; border-radius: 999px; overflow: hidden; gap: 2px; margin-top: 8px; }
+  .seg-red { background: var(--red); } .seg-yel { background: var(--yellow); } .seg-green { background: var(--green); }
+  .dist-legend { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+  .dist-legend span { font-size: 12px; color: var(--text-lighter); display: flex; align-items: center; gap: 4px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  footer { text-align: center; font-size: 12px; color: var(--text-lighter); padding: 32px 0 16px; }
+  @media(max-width:700px) { .metrics-row { flex-direction: column; } }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-title">Encuesta de clima — Abril 2026</div>
+  <span class="badge">Finalizada</span>
+</div>
+<div class="page">
+  <div class="area-card">
+    <div class="card-header">
+      <span class="area-name">Product</span>
+      <div class="metrics-row">
+        <div class="metric-pill"><span class="m-label">Participación</span><span class="m-value" style="color:var(--green)">83%</span><span class="m-sub">5 / 6</span></div>
+        <div class="metric-pill"><span class="m-label">Favorabilidad</span><span class="m-value" style="color:var(--red)">28.7%</span><span class="m-sub">puntaje</span></div>
+        <div class="metric-pill"><span class="m-label">eNPS</span><span class="m-value" style="color:var(--red);">-40</span><span class="m-sub">Net Promoter Score</span></div>
+        <div class="metric-pill"><span class="m-label">Respuestas</span><span class="m-value" style="color:var(--blue-dark)">5</span><span class="m-sub">personas</span></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="enps-section">
+        <div class="q-section-label">Distribución eNPS</div>
+        <div class="dist-bar">
+          <div class="seg-red" style="width:40%"></div>
+          <div class="seg-yel" style="width:60%"></div>
+          <div class="seg-green" style="width:0%"></div>
+        </div>
+        <div class="dist-legend">
+          <span><span class="dot" style="background:var(--red)"></span>Detractores 40%</span>
+          <span><span class="dot" style="background:var(--yellow)"></span>Neutros 60%</span>
+          <span><span class="dot" style="background:var(--green)"></span>Promotores 0%</span>
+        </div>
+      </div>
+      <div class="q-section-label">Engagement</div>
+      <table class="q-table">
+        <tr><td class="q-label">Me siento bastante satisfecho con mi rol y las tareas que realizo en Lebane</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:56.0%"></div></div></td><td class="q-pct-cell mid">56.0</td></tr>
+        <tr><td class="q-label">Siento que en Lebane tengo la oportunidad de aprender y crecer profesionalmente</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:64.0%"></div></div></td><td class="q-pct-cell mid">64.0</td></tr>
+        <tr><td class="q-label">Mi trabajo me motiva</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:60.0%"></div></div></td><td class="q-pct-cell mid">60.0</td></tr>
+      </table>
+      <div class="q-section-label">Performance enablement</div>
+      <table class="q-table">
+        <tr><td class="q-label">Tengo claro qué es lo que tengo que lograr o conseguir</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill low" style="width:52.0%"></div></div></td><td class="q-pct-cell low">52.0</td></tr>
+        <tr><td class="q-label">Se me brinda confianza</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:68.0%"></div></div></td><td class="q-pct-cell mid">68.0</td></tr>
+        <tr><td class="q-label">Veo el impacto de mi trabajo</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:56.0%"></div></div></td><td class="q-pct-cell mid">56.0</td></tr>
+      </table>
+      <div class="q-section-label">Culture</div>
+      <table class="q-table">
+        <tr><td class="q-label">Hay un interés en mí como persona y por mi desarrollo humano</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:60.0%"></div></div></td><td class="q-pct-cell mid">60.0</td></tr>
+        <tr><td class="q-label">Normalmente se me pregunta por mi opinión y la misma es escuchada</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:68.0%"></div></div></td><td class="q-pct-cell mid">68.0</td></tr>
+        <tr><td class="q-label">En Lebane puedo ser yo mismo/a</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:60.0%"></div></div></td><td class="q-pct-cell mid">60.0</td></tr>
+        <tr><td class="q-label">La sinceridad, la buena educación y el respeto son valorados por la empresa y mis com…</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:64.0%"></div></div></td><td class="q-pct-cell mid">64.0</td></tr>
+      </table>
+      <div class="q-section-label">Communication</div>
+      <table class="q-table">
+        <tr><td class="q-label">Hay claridad en la comunicación</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill low" style="width:44.0%"></div></div></td><td class="q-pct-cell low">44.0</td></tr>
+      </table>
+      <div class="q-section-label">Retention risk</div>
+      <div class="ret-note">En estas preguntas, score alto indica mayor riesgo de agotamiento.</div>
+      <table class="q-table">
+        <tr><td class="q-label">Al finalizar la jornada laboral suelo necesitar más tiempo que antes para poder relaj…</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:60.0%"></div></div></td><td class="q-pct-cell mid">60.0</td></tr>
+        <tr><td class="q-label">Habitualmente debo hacer mayores esfuerzos del ordinario para llevar a cabo mi trabaj…</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:56.0%"></div></div></td><td class="q-pct-cell mid">56.0</td></tr>
+        <tr><td class="q-label">Con frecuencia me siento tensionado o cansado</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:56.0%"></div></div></td><td class="q-pct-cell mid">56.0</td></tr>
+      </table>
+      <div class="q-section-label">Leadership</div>
+      <table class="q-table">
+        <tr><td class="q-label">Mi líder se preocupa por mí y por el equipo</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:68.0%"></div></div></td><td class="q-pct-cell mid">68.0</td></tr>
+        <tr><td class="q-label">Mi líder ayuda al equipo cuando es necesario</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:60.0%"></div></div></td><td class="q-pct-cell mid">60.0</td></tr>
+        <tr><td class="q-label">Cuando logro cosas importantes o realizo un extra en mis tareas, mi líder directo me …</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:64.0%"></div></div></td><td class="q-pct-cell mid">64.0</td></tr>
+        <tr><td class="q-label">Cuando me equivoco o no lo hago del todo bien, mi líder me da feedback para mejorar</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:60.0%"></div></div></td><td class="q-pct-cell mid">60.0</td></tr>
+        <tr><td class="q-label">Si pudiera elegir a mi líder, seguiría eligiendo al que tengo actualmente</td><td class="q-bar-cell"><div class="q-bar-bg"><div class="q-bar-fill mid" style="width:64.0%"></div></div></td><td class="q-pct-cell mid">64.0</td></tr>
+      </table>
+
+      <div class="q-section-label" style="font-size:15px;margin-top:32px;border-top:1px solid #f0f0f5;padding-top:20px">Comentarios abiertos</div>
+      <div class="q-section-label">✨ LO QUE MÁS GUSTA</div>
+      <div class="comment-bubble">Buena predisposición, hands-on</div>
+      <div class="comment-bubble">Las ganas de evolucionar</div>
+      <div class="comment-bubble">Hay varios puntos que hoy me gustan mucho de Lebane:
+-El nivel de crecimiento que tiene y tuvo la empresa a lo largo de estos últimos dos años.
+-el compañerismo y el grupo que se armó entre las distintas áreas.
+-las oficinas son un gran punto a favor y cada vez van mejorando más.
+-el espacio de feedback que se genera en diversas ocasiones para que cada uno pueda mejorar.
+-la horizontalidad que hay con respecto a líderes de cada área, siempre se da el espacio a opiniones.</div>
+      <div class="comment-bubble">El ambiente</div>
+      <div class="comment-bubble">Que siempre hay algo para hacer</div>
+      <div class="q-section-label">⚠️ LO QUE MENOS GUSTA</div>
+      <div class="comment-bubble">Falta de definciones en general, poco onborading a nuevos empleados</div>
+      <div class="comment-bubble">La falta de alineación entre líderes, pero entiendo que se está trabajando en eso.</div>
+      <div class="comment-bubble">-La falta de definición de límites de cada rol, hay veces que ciertas áreas tratan de tomar definiciones sobre lo que se está trabajando sin tener la foto completa.
+
+-a veces las definiciones de ciertos temas no se respetan.</div>
+      <div class="comment-bubble">El estrés</div>
+      <div class="comment-bubble">Que las prioridades cambien constantemente</div>
+      <div class="q-section-label">👤 COMENTARIOS SOBRE EL LÍDER</div>
+      <div class="comment-bubble">Esta OK asi</div>
+      <div class="comment-bubble">Tiene mucho criterio y toma buenas decisiones. Falta acompañar y encausar algunos temas por falta de tiempo.</div>
+      <div class="comment-bubble">En líneas generales tengo una muy buena dinámica de trabajo con Diego, lo cual me ayuda a mejorar mis entregables y desarrollo personal.</div>
+      <div class="comment-bubble">Nada, gran líder y buena persona</div>
+      <div class="comment-bubble">Me gustaría que haya más instancias de feedback</div>
+      <div class="q-section-label">💬 POR QUÉ NO UN 10 (eNPS)</div>
+      <div class="comment-bubble">recorrido, experiencia... con el tiempo se va a dar</div>
+      <div class="comment-bubble">Falta organización y foco. Que esté claro el norte para toda la empresa y que todos los colaboradores entiendan y acompañen.</div>
+      <div class="comment-bubble">Siento que es un lugar que no todos encajan por el estadio de la empresa, es muy dinámico y exigente en cuanto lo que hay que lograr. Ese es el único punto por el cual no lo recomendaría para cualquiera.</div>
+      <div class="comment-bubble">No creo que sea un trabajo para cualquiera</div>
+      <div class="q-section-label">🤝 COMENTARIOS CULTURA</div>
+      <div class="comment-bubble">Porque un 5 entiendo que sería puntaje perfecto y siempre hay espacio para mejora</div>
+      <div class="comment-bubble">Me ha pasado con algún compañero que no me relaciono tan frecuentemente que ni siquiera dice "buen día" antes de pedirme algo.</div>
+      <div class="comment-bubble">Me faltan instancias de feedback para enfocar mejor mis esfuerzos</div>
+      <div class="q-section-label">📡 COMENTARIOS COMUNICACIÓN</div>
+      <div class="comment-bubble">hay poca clariad a veces, marchas y contramarchas</div>
+      <div class="comment-bubble">Muuuuchas reuniones falta que se encaminen. Entender por qué estamos en esa reunión y cuáles son los accionables claros que se lleva cada uno con sus respectivos deadlines. Cuesta cerrar temas a veces.</div>
+      <div class="comment-bubble">Se definen ciertos lineamientos que no todos terminan siguiéndolos, se generan múltiples reuniones infinitas con muchos participantes en la que se definen puntos de resolución que luego no son respetados o al poco tiempo cambian.</div>
+      <div class="comment-bubble">A veces falla la comunicación pero es más que nada porque pasan demasiado cosas a la vez</div>
+
+    </div>
+  </div>
+  <footer>Encuesta de clima · Lebane · Abril 2026 &nbsp;·&nbsp; Generado el 29/04/2026</footer>
+</div>
+</body>
+</html>`;
+}
